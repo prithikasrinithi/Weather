@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Dashboard</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            background-color: #f0f2f5;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .weather-card {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        .search-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .weather-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        .weather-detail {
+            text-align: center;
+        }
+        .chart-container {
+            height: 300px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="weather-card">
+            <div class="search-container">
+                <input type="text" id="cityInput" placeholder="Enter city name">
+                <button onclick="getWeather()">Search</button>
+            </div>
+            <div class="weather-info">
+                <div class="weather-detail">
+                    <h2>Temperature</h2>
+                    <p id="temp">--</p>
+                </div>
+                <div class="weather-detail">
+                    <h2>Humidity</h2>
+                    <p id="humidity">--</p>
+                </div>
+                <div class="weather-detail">
+                    <h2>Wind Speed</h2>
+                    <p id="wind">--</p>
+                </div>
+                <div class="weather-detail">
+                    <h2>Condition</h2>
+                    <p id="condition">--</p>
+                </div>
+            </div>
+        </div>
+        <div class="weather-card">
+            <h2>Temperature Forecast</h2>
+            <div class="chart-container">
+                <canvas id="forecastChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let chart;
+
+        async function getWeather() {
+            const city = document.getElementById('cityInput').value;
+            if (!city) return;
+
+            try {
+                // For demonstration, using placeholder data
+                // In a real app, you would fetch from a weather API
+                const weatherData = generatePlaceholderData();
+                updateWeatherDisplay(weatherData);
+                updateForecastChart(weatherData.forecast);
+            } catch (error) {
+                console.error('Error fetching weather data:', error);
+            }
+        }
+
+        function generatePlaceholderData() {
+            const temp = Math.round(Math.random() * 20 + 10);
+            const humidity = Math.round(Math.random() * 40 + 30);
+            const windSpeed = Math.round(Math.random() * 20 + 5);
+            const conditions = ['Sunny', 'Cloudy', 'Rainy', 'Partly Cloudy'];
+            const condition = conditions[Math.floor(Math.random() * conditions.length)];
+
+            const forecast = Array.from({length: 7}, (_, i) => ({
+                day: new Date(Date.now() + i * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', {weekday: 'short'}),
+                temp: Math.round(Math.random() * 15 + temp - 5)
+            }));
+
+            return {
+                temp,
+                humidity,
+                windSpeed,
+                condition,
+                forecast
+            };
+        }
+
+        function updateWeatherDisplay(data) {
+            document.getElementById('temp').textContent = `${data.temp}°C`;
+            document.getElementById('humidity').textContent = `${data.humidity}%`;
+            document.getElementById('wind').textContent = `${data.windSpeed} km/h`;
+            document.getElementById('condition').textContent = data.condition;
+        }
+
+        function updateForecastChart(forecast) {
+            const ctx = document.getElementById('forecastChart').getContext('2d');
+            
+            if (chart) {
+                chart.destroy();
+            }
+
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: forecast.map(f => f.day),
+                    datasets: [{
+                        label: 'Temperature (°C)',
+                        data: forecast.map(f => f.temp),
+                        borderColor: '#007bff',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: false
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
